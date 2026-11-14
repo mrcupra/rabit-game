@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>الأرنوبة الشقية 🐰🥕 — الإصدار الأونلاين</title>
+    <meta name="description" content="العب الأرنوبة الشقية أونلاين: سباقات حية، 100 مرحلة، طور لا نهائي، معارك زعماء، جواهر وحيوانات أليفة وزلاجات!" />
+    <meta name="theme-color" content="#070b14" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="الأرنوبة الشقية" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <link rel="canonical" href="https://rabit.megadeveloper.site/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rabit.megadeveloper.site/" />
+    <meta property="og:title" content="الأرنوبة الشقية 🐰💎" />
+    <meta property="og:description" content="سباقات أونلاين، 100 مرحلة، زعماء، جواهر، ومغامرة ضخمة — العب دلوقتي!" />
+    <meta property="og:image" content="https://rabit.megadeveloper.site/assets/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="style.css?v=14" />
+</head>
+<body>
+<div id="app">
+    <canvas id="gameCanvas" aria-label="ساحة اللعب"></canvas>
+
+    <!-- ============ IN-GAME HUD ============ -->
+    <div id="hud" class="hud hidden">
+        <div class="hud-row">
+            <div class="hud-stats">
+                <div class="pill pill-carrot" id="pill-carrots">
+                    <span class="pill-ico">🥕</span>
+                    <div class="pill-txt"><small>المرحلة</small><b id="hud-carrots">0 / 0</b></div>
+                </div>
+                <div class="pill">
+                    <span class="pill-ico">🏦</span>
+                    <div class="pill-txt"><small>البنك</small><b id="hud-bank">0</b></div>
+                </div>
+                <div class="pill pill-gem">
+                    <span class="pill-ico">💎</span>
+                    <div class="pill-txt"><small>جواهر</small><b id="hud-gems">0</b></div>
+                </div>
+                <div class="pill">
+                    <div class="pill-txt"><small>الأرواح</small><b id="hud-lives">❤️❤️❤️</b></div>
+                </div>
+                <div class="pill pill-rank hidden" id="hud-rank-pill">
+                    <b id="hud-rank">🥇 1/4</b>
+                </div>
+            </div>
+
+            <div class="hud-progress" aria-label="التقدم لخط النهاية">
+                <span class="hud-level" id="hud-level">ليفل 1</span>
+                <div class="track">
+                    <div class="fill" id="hud-fill"></div>
+                    <div class="hud-racers" id="hud-racers"></div>
+                    <div class="runner" id="hud-runner">🐰</div>
+                </div>
+                <span class="hud-flag">🏁</span>
+            </div>
+
+            <div class="hud-actions">
+                <button class="icon-btn style-hud-btn" id="btn-hud-style" type="button" title="تغيير طريقة اللعب (G)"><span id="hud-style-ico">🏃‍♀️</span> <small id="hud-style-txt">جري</small></button>
+                <button class="icon-btn ult-hud-btn" id="btn-hud-ult" type="button" title="المهارة الخارقة (E / Shift)">💥 <small id="hud-ult-pct">0%</small></button>
+                <button class="icon-btn" id="btn-bgm" type="button" title="الموسيقى">🎵</button>
+                <button class="icon-btn" id="btn-pause" type="button" title="إيقاف مؤقت">⏸</button>
+                <button class="icon-btn" id="btn-mute" type="button" title="الصوت">🔊</button>
+                <button class="icon-btn" id="btn-fullscreen" type="button" title="ملء الشاشة">⛶</button>
+            </div>
+        </div>
+
+        <div id="boss-hud" class="boss-hud hidden">
+            <span class="boss-label" id="boss-name">🐉 ملك العقبات</span>
+            <div class="boss-track"><div class="boss-fill" id="boss-hp-fill"></div></div>
+            <span class="boss-hp-txt" id="boss-hp-text">100%</span>
+        </div>
+
+        <div id="hud-emotes" class="hud-emotes hidden">
+            <button type="button" class="emote-btn" data-emote="🔥">🔥</button>
+            <button type="button" class="emote-btn" data-emote="😂">😂</button>
+            <button type="button" class="emote-btn" data-emote="⚡">⚡</button>
+            <button type="button" class="emote-btn" data-emote="👑">👑</button>
+            <button type="button" class="emote-btn" data-emote="🐰">🐰</button>
+        </div>
+
+        <div class="hud-powerups" id="hud-powerups"></div>
+    </div>
+
+    <!-- ============ TOUCH CONTROLS (touch devices only) ============ -->
+    <div id="touch-controls" class="touch-controls hidden">
+        <div class="tc-group">
+            <button class="tc-btn" id="tc-slide" type="button"><span id="tc-slide-ico">⬇️</span><small id="tc-slide-txt">انزلاق</small></button>
+            <button class="tc-btn tc-ult" id="tc-ult" type="button"><span>💥</span><small id="tc-ult-pct">0%</small></button>
+        </div>
+        <div class="tc-group">
+            <button class="tc-btn tc-dash" id="tc-dash" type="button"><span id="tc-dash-ico">⚡</span><small id="tc-dash-txt">نيترو</small></button>
+            <button class="tc-btn tc-jump" id="tc-jump" type="button"><span id="tc-jump-ico">⬆️</span><small id="tc-jump-txt">قفز</small></button>
+        </div>
+    </div>
+
+    <!-- ============ BOOT ============ -->
+    <section id="boot-screen" class="screen screen-bg">
+        <div class="boot">
+            <div class="spinner"></div>
+            <div class="muted">جاري تحضير عالم الأرنوبة الشقية أونلاين...</div>
+        </div>
+    </section>
+
+    <!-- ============ AUTH (LOGIN / REGISTER) ============ -->
+    <section id="auth-screen" class="screen screen-bg hidden">
+        <div class="panel auth-panel">
+            <div class="auth-hero">
+                <img id="auth-hero-img" alt="الأرنوبة الشقية" />
+                <div class="auth-hero-tag">🐰 الأرنوبة الشقية 5D أونلاين 💎</div>
+            </div>
+            <div class="auth-body">
+                <h1 class="brand-title">الأرنوبة الشقية</h1>
+                <p class="muted">سجّل دخولك للعب سباقات أونلاين، حفظ جواهرك وجزرك ومستوياتك على السيرفر</p>
+
+                <div class="seg" role="tablist">
+                    <button class="seg-btn active" type="button" data-auth-tab="login">تسجيل الدخول</button>
+                    <button class="seg-btn" type="button" data-auth-tab="register">حساب جديد (+50 💎)</button>
+                </div>
+
+                <form id="auth-form" novalidate>
+                    <label class="field">
+                        <span>اسم المستخدم</span>
+                        <input id="auth-username" name="username" type="text" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="20" required />
+                    </label>
+                    <label class="field">
+                        <span>كلمة المرور</span>
+                        <input id="auth-password" name="password" type="password" autocomplete="current-password" maxlength="64" required />
+                    </label>
+                    <label class="field hidden" id="field-confirm">
+                        <span>تأكيد كلمة المرور</span>
+                        <input id="auth-confirm" name="confirm" type="password" autocomplete="new-password" maxlength="64" />
+                    </label>
+                    <div class="form-error" id="auth-error" role="alert"></div>
+                    <button class="btn btn-primary btn-block" id="auth-submit" type="submit">دخول 🚀</button>
+                </form>
+                <div class="auth-mode" id="auth-mode"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ INTRO ============ -->
+    <section id="intro-screen" class="screen screen-bg hidden">
+        <div class="panel intro-panel">
+            <div class="intro-visual"><img id="intro-hero-img" alt="" /></div>
+            <div class="intro-body">
+                <span class="badge" id="intro-badge"></span>
+                <h2 class="intro-title" id="intro-title"></h2>
+                <p class="intro-text" id="intro-text"></p>
+                <div class="dots" id="intro-dots"></div>
+                <div class="row-actions">
+                    <button class="btn btn-primary" id="btn-intro-next" type="button">التالي</button>
+                    <button class="btn btn-ghost" id="btn-intro-skip" type="button">تخطي</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ HOME HUB ============ -->
+    <section id="home-screen" class="screen screen-bg hidden">
+        <div class="panel hub">
+            <header class="hub-head">
+                <div class="hub-brand">
+                    <img id="hub-avatar" class="avatar" alt="" />
+                    <div>
+                        <div class="brand-row">
+                            <span class="brand-title sm">الأرنوبة الشقية</span>
+                            <span id="hub-vip-badge" class="vip-tag hidden">👑 VIP</span>
+                        </div>
+                        <div class="muted small">
+                            أهلاً يا <b id="hub-username"></b> • <span id="hub-user-title" class="user-title-chip">أرنوب مغامر</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hub-chips">
+                    <div class="chip chip-carrot" title="بنك الجزر">🥕 <b id="hub-bank">0</b></div>
+                    <div class="chip chip-gem" title="الجواهر">
+                        💎 <b id="hub-gems">0</b>
+                        <button class="chip-plus" id="btn-quick-topup" type="button" title="شحن جواهر">+</button>
+                    </div>
+                    <div class="chip chip-trophy" title="كؤوس الأونلاين">🏆 <b id="hub-trophies">0</b></div>
+                    <div class="chip chip-gold" title="النجوم">⭐ <b id="hub-stars" dir="ltr">0 / 300</b></div>
+                    <button class="icon-btn" id="btn-hub-bgm" type="button" title="الموسيقى">🎵</button>
+                    <button class="icon-btn" id="btn-hub-mute" type="button" title="الصوت">🔊</button>
+                    <button class="icon-btn" id="btn-logout" type="button" title="تسجيل الخروج">🚪</button>
+                </div>
+            </header>
+
+            <div class="hub-quickbar">
+                <button class="q-btn" id="btn-open-spin" type="button">🎡 عجلة الحظ <span id="spin-dot" class="q-dot hidden"></span></button>
+                <button class="q-btn" id="btn-open-daily" type="button">📅 مكافأة اليوم <span id="daily-dot" class="q-dot hidden"></span></button>
+                <button class="q-btn" id="btn-open-pass" type="button">👑 الباتل باس</button>
+                <button class="q-btn" id="btn-open-promo" type="button">🎟️ كود هدية</button>
+                <button class="q-btn" id="btn-open-profile" type="button">🪪 ملفي الشخصي</button>
+            </div>
+
+            <nav class="tabs" role="tablist">
+                <button class="tab active" type="button" data-tab="levels">🗺️ المراحل والأطوار</button>
+                <button class="tab" type="button" data-tab="online">🏎️ سباقات أونلاين</button>
+                <button class="tab" type="button" data-tab="chars">🐰 الأبطال والرفاق</button>
+                <button class="tab" type="button" data-tab="worlds">🌍 العوالم والقدرات</button>
+                <button class="tab" type="button" data-tab="shop">💎 شحن الجواهر</button>
+                <button class="tab" type="button" data-tab="quests">📜 المهام والإنجازات</button>
+                <button class="tab" type="button" data-tab="leaderboard">🏆 المتصدرين والعشائر</button>
+            </nav>
+
+            <div class="hub-content">
+                <!-- 1. LEVELS & MODES -->
+                <div class="tab-panel" id="panel-levels">
+                    <div class="playstyle-grid" id="play-style-bar">
+                        <button type="button" class="playstyle-card active" data-playstyle="runner">
+                            <span class="ps-ico" aria-hidden="true">🏃‍♀️</span>
+                            <div class="ps-info">
+                                <b>الجري والقفز الكلاسيكي</b>
+                                <small>قفز مزدوج • انزلاق • نيترو</small>
+                            </div>
+                            <span class="ps-tag">كلاسيكي</span>
+                        </button>
+                        <button type="button" class="playstyle-card" data-playstyle="jetpack">
+                            <span class="ps-ico" aria-hidden="true">🚀</span>
+                            <div class="ps-info">
+                                <b>الطيران النفاث والليزر</b>
+                                <small>طيران حر في السماء • مدفع بلازما</small>
+                            </div>
+                            <span class="ps-tag">طيران وقتال</span>
+                        </button>
+                        <button type="button" class="playstyle-card" data-playstyle="lanes">
+                            <span class="ps-ico" aria-hidden="true">🛹</span>
+                            <div class="ps-info">
+                                <b>تزلج الـ 3 مسارات</b>
+                                <small>تبديل بين 3 حارات • بوابات مضاعفة</small>
+                            </div>
+                            <span class="ps-tag">3 حارات</span>
+                        </button>
+                    </div>
+                    <div class="sub-bar" id="play-mode-bar">
+                        <button type="button" class="sub-btn active" data-playmode="story">🗺️ 100 مرحلة القصة</button>
+                        <button type="button" class="sub-btn" data-playmode="devil">😈 طور المقالب (200 ليفل)</button>
+                        <button type="button" class="sub-btn" data-playmode="endless">♾️ الطور اللانهائي</button>
+                        <button type="button" class="sub-btn" data-playmode="boss">🐉 ساحة الزعماء</button>
+                    </div>
+                    <div id="story-mode-wrap">
+                        <div id="devil-mode-banner" class="devil-banner hidden"></div>
+                        <div class="world-bar" id="world-bar"></div>
+                        <div class="grid grid-levels" id="levels-grid"></div>
+                    </div>
+                    <div id="special-mode-wrap" class="hidden"></div>
+                </div>
+
+                <!-- 2. ONLINE RACES -->
+                <div class="tab-panel hidden" id="panel-online">
+                    <div id="online-modes-grid" class="grid grid-cards"></div>
+                    <div id="race-lobby" class="race-lobby hidden">
+                        <div class="lobby-head">
+                            <div>
+                                <div class="card-title" id="lobby-title">🏎️ غرفة السباق الأونلاين</div>
+                                <div class="muted small" id="lobby-sub">جاري تجهيز المتسابقين...</div>
+                            </div>
+                            <div class="lobby-code hidden" id="lobby-room-code"></div>
+                        </div>
+                        <div class="lobby-slots" id="lobby-slots"></div>
+                        <div class="row-actions">
+                            <button type="button" class="btn btn-primary" id="btn-start-race-now">انطلاق الآن! 🏁</button>
+                            <button type="button" class="btn btn-ghost" id="btn-cancel-race">إلغاء والعودة</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. CHARACTERS, PETS, BOARDS, TRAILS -->
+                <div class="tab-panel hidden" id="panel-chars">
+                    <div class="sub-bar" id="chars-subtabs">
+                        <button type="button" class="sub-btn active" data-charsub="chars">🐰 الشخصيات</button>
+                        <button type="button" class="sub-btn" data-charsub="pets">🐾 الحيوانات الأليفة</button>
+                        <button type="button" class="sub-btn" data-charsub="boards">🛹 الزلاجات الطائرة</button>
+                        <button type="button" class="sub-btn" data-charsub="trails">✨ آثار الجري</button>
+                    </div>
+                    <div class="grid grid-cards" id="chars-grid"></div>
+                </div>
+
+                <!-- 4. WORLDS, UPGRADES, ULTIMATES -->
+                <div class="tab-panel hidden" id="panel-worlds">
+                    <div class="sub-bar" id="worlds-subtabs">
+                        <button type="button" class="sub-btn active" data-worldsub="worlds">🌍 العوالم</button>
+                        <button type="button" class="sub-btn" data-worldsub="upgrades">⚡ تطوير القدرات</button>
+                        <button type="button" class="sub-btn" data-worldsub="ultimates">💥 المهارات الخارقة</button>
+                    </div>
+                    <div class="grid grid-cards" id="worlds-grid"></div>
+                </div>
+
+                <!-- 5. GEM TOP-UP, CHESTS & CONVERTER -->
+                <div class="tab-panel hidden" id="panel-shop">
+                    <div class="shop-section-title">💎 باقات شحن الجواهر الفورية</div>
+                    <div class="grid grid-cards" id="topup-grid"></div>
+                    <div class="shop-section-title">🎁 صناديق الحظ السحرية (اربح شخصيات ورفاق وجواهر!)</div>
+                    <div class="grid grid-cards" id="chests-grid"></div>
+                    <div class="shop-section-title">🔄 تحويل الجواهر إلى جزر</div>
+                    <div class="grid grid-cards" id="exchange-grid"></div>
+                </div>
+
+                <!-- 6. QUESTS & ACHIEVEMENTS -->
+                <div class="tab-panel hidden" id="panel-quests">
+                    <div class="sub-bar" id="quests-subtabs">
+                        <button type="button" class="sub-btn active" data-questsub="daily">📅 المهام اليومية</button>
+                        <button type="button" class="sub-btn" data-questsub="achievements">🏅 الإنجازات الأسطورية</button>
+                    </div>
+                    <div class="leaderboard" id="quests-list"></div>
+                </div>
+
+                <!-- 7. LEADERBOARD & CLANS -->
+                <div class="tab-panel hidden" id="panel-leaderboard">
+                    <div class="sub-bar" id="lb-subtabs">
+                        <button type="button" class="sub-btn active" data-lbsub="stars">⭐ النجوم</button>
+                        <button type="button" class="sub-btn" data-lbsub="trophies">🏆 كؤوس الأونلاين</button>
+                        <button type="button" class="sub-btn" data-lbsub="endless">♾️ الطور اللانهائي</button>
+                        <button type="button" class="sub-btn" data-lbsub="clans">🛡️ العشائر والتحالفات</button>
+                    </div>
+                    <div class="leaderboard" id="leaderboard-list"></div>
+                    <div id="clans-panel" class="hidden"></div>
+                </div>
+            </div>
+
+            <footer class="hub-foot">
+                <div class="controls-hint" id="controls-hint"></div>
+                <div class="row-actions">
+                    <button class="btn btn-ghost" id="btn-replay-intro" type="button">🎬 المقدمة</button>
+                    <button class="btn btn-primary btn-play" id="btn-play" type="button">ابدأ 🚀</button>
+                </div>
+            </footer>
+        </div>
+    </section>
+
+    <!-- ============ PAUSE ============ -->
+    <section id="pause-screen" class="screen screen-dim hidden">
+        <div class="panel modal">
+            <div class="modal-ico">⏸️</div>
+            <h2 class="modal-title">اللعبة متوقفة</h2>
+            <p class="muted" id="pause-sub"></p>
+            <div class="pause-style-wrap">
+                <div class="muted small" style="margin-bottom:5px;">بدّل طريقة اللعب فوراً:</div>
+                <div class="pause-style-bar" id="pause-style-bar">
+                    <button type="button" class="sub-btn active" data-playstyle="runner">🏃‍♀️ جري</button>
+                    <button type="button" class="sub-btn" data-playstyle="jetpack">🚀 طيران</button>
+                    <button type="button" class="sub-btn" data-playstyle="lanes">🛹 3 مسارات</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary btn-block" id="btn-resume" type="button">كمّل ▶️</button>
+                <button class="btn btn-ghost btn-block" id="btn-restart" type="button">إعادة 🔄</button>
+                <button class="btn btn-ghost btn-block" id="btn-quit" type="button">الصفحة الرئيسية 🏠</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ INSTANT GEM REVIVE MODAL ============ -->
+    <section id="revive-modal" class="screen screen-dim hidden">
+        <div class="panel modal">
+            <div class="modal-ico">💖💎</div>
+            <h2 class="modal-title">عايزة تكمّلي المرحلة؟</h2>
+            <p class="muted">استخدمي <b id="revive-cost">15</b> جوهرة للإنعاش الفوري بـ ❤️❤️ + موجة تدمر كل العوائق!</p>
+            <div class="revive-countdown" id="revive-timer">6</div>
+            <div class="modal-actions">
+                <button class="btn btn-gem btn-block" id="btn-revive-gem" type="button">إنعاش فوري بـ 15 💎</button>
+                <button class="btn btn-ghost btn-block" id="btn-revive-skip" type="button">إنهاء الجولة</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ RESULT ============ -->
+    <section id="result-screen" class="screen screen-dim hidden">
+        <div class="panel modal">
+            <img id="result-img" class="result-img" alt="" />
+            <div class="result-stars" id="result-stars"></div>
+            <h2 class="modal-title" id="result-title"></h2>
+            <div class="result-stats" id="result-stats"></div>
+            <div class="modal-actions">
+                <button class="btn btn-primary btn-block" id="btn-next" type="button">الليفل التالي 🚀</button>
+                <button class="btn btn-ghost btn-block" id="btn-retry" type="button">إعادة 🔄</button>
+                <button class="btn btn-ghost btn-block" id="btn-home" type="button">الصفحة الرئيسية 🏠</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ TOP-UP PAYMENT GATEWAY MODAL ============ -->
+    <section id="topup-modal" class="screen screen-dim hidden">
+        <div class="panel modal modal-wide">
+            <div class="modal-ico">💎💳</div>
+            <h2 class="modal-title">بوابة شحن الجواهر</h2>
+            <div class="result-stats" id="topup-pkg-summary"></div>
+            <div class="pay-methods" id="pay-methods">
+                <button type="button" class="pay-btn active" data-method="vodafone">📱 فودافون كاش</button>
+                <button type="button" class="pay-btn" data-method="instapay">🏦 إنستا باي</button>
+                <button type="button" class="pay-btn" data-method="card">💳 بطاقة بنكية</button>
+                <button type="button" class="pay-btn" data-method="instant">⚡ شحن تجريبي فوري</button>
+            </div>
+            <label class="field" style="width:100%; text-align:right;">
+                <span id="topup-input-label">رقم المحفظة أو المرجع (اختياري للتفعيل الفوري)</span>
+                <input id="topup-account-input" type="text" placeholder="مثال: 010xxxxxxxx أو تفعيل فوري" maxlength="32" />
+            </label>
+            <div class="modal-actions">
+                <button class="btn btn-gem btn-block" id="btn-confirm-topup" type="button">تأكيد وشحن الجواهر فوراً 💎</button>
+                <button class="btn btn-ghost btn-block" id="btn-close-topup" type="button">إغلاق</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ LUCKY SPIN WHEEL MODAL ============ -->
+    <section id="spin-modal" class="screen screen-dim hidden">
+        <div class="panel modal modal-wide">
+            <h2 class="modal-title">🎡 عجلة الحظ اليومية</h2>
+            <div class="spin-wrap">
+                <div class="spin-pointer">▼</div>
+                <canvas id="spin-canvas" width="260" height="260"></canvas>
+            </div>
+            <div class="muted" id="spin-result-msg">لف العجلة واكسب جواهر وجزر مجانية كل يوم!</div>
+            <div class="modal-actions">
+                <button class="btn btn-primary btn-block" id="btn-spin-free" type="button">لف مجاناً الآن 🎁</button>
+                <button class="btn btn-gem btn-block" id="btn-spin-gem" type="button">لف إضافي بـ 25 💎</button>
+                <button class="btn btn-ghost btn-block" id="btn-close-spin" type="button">إغلاق</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ DAILY LOGIN REWARDS MODAL ============ -->
+    <section id="daily-modal" class="screen screen-dim hidden">
+        <div class="panel modal modal-wide">
+            <h2 class="modal-title">📅 مكافآت الدخول اليومي (7 أيام)</h2>
+            <p class="muted small">سجّل دخولك كل يوم عشان تاخد جواهر وجزر متصاعدة!</p>
+            <div class="daily-grid" id="daily-grid"></div>
+            <div class="modal-actions">
+                <button class="btn btn-gold btn-block" id="btn-claim-daily" type="button">استلام مكافأة اليوم 🎁</button>
+                <button class="btn btn-ghost btn-block" id="btn-close-daily" type="button">إغلاق</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ BATTLE PASS MODAL ============ -->
+    <section id="pass-modal" class="screen screen-dim hidden">
+        <div class="panel modal modal-xl">
+            <div class="modal-head-row">
+                <div>
+                    <h2 class="modal-title">👑 الباتل باس الموسمي</h2>
+                    <div class="muted small" id="pass-header-info">مستوى 1 • 0 XP</div>
+                </div>
+                <button class="btn btn-gold" id="btn-unlock-vip" type="button">تفعيل VIP بـ 300 💎</button>
+            </div>
+            <div class="xp-bar"><div class="xp-fill" id="pass-xp-fill"></div></div>
+            <div class="pass-list" id="pass-tiers-list"></div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost btn-block" id="btn-close-pass" type="button">إغلاق</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ PROMO CODE MODAL ============ -->
+    <section id="promo-modal" class="screen screen-dim hidden">
+        <div class="panel modal">
+            <div class="modal-ico">🎟️💎</div>
+            <h2 class="modal-title">تفعيل كود شحن أو هدية</h2>
+            <p class="muted small">جرّب أكواد الافتتاح: <b>ARNOUBA2026</b> • <b>FREE500</b> • <b>SPEEDKING</b></p>
+            <label class="field" style="width:100%;">
+                <input id="promo-input" type="text" placeholder="اكتب الكود هنا..." maxlength="24" style="text-align:center; text-transform:uppercase;" />
+            </label>
+            <div class="form-error" id="promo-status"></div>
+            <div class="modal-actions">
+                <button class="btn btn-primary btn-block" id="btn-redeem-promo" type="button">تفعيل الكود 🚀</button>
+                <button class="btn btn-ghost btn-block" id="btn-close-promo" type="button">إغلاق</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ PROFILE & TITLES MODAL ============ -->
+    <section id="profile-modal" class="screen screen-dim hidden">
+        <div class="panel modal modal-xl">
+            <h2 class="modal-title">🪪 البطاقة الشخصية والألقاب</h2>
+            <div id="profile-card-content" class="profile-summary"></div>
+            <div class="shop-section-title" style="text-align:right; width:100%;">اختر لقبك المفضل:</div>
+            <div id="titles-grid" class="titles-grid"></div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost btn-block" id="btn-close-profile" type="button">إغلاق</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ ROTATE TO LANDSCAPE ============ -->
+    <div id="rotate-overlay" class="rotate-overlay hidden">
+        <div class="rotate-phone">📱</div>
+        <h2>لفّ الموبايل بالعرض</h2>
+        <p>اللعبة بتشتغل في الوضع العرضي بس عشان تشوف الطريق والعوائق كويس 🐰</p>
+        <p class="rotate-ios-hint" id="rotate-ios-hint">💡 على الآيفون: افتح قفل الدوران من مركز التحكم لو الشاشة مش بتلف</p>
+    </div>
+
+    <div id="toast" class="toast hidden" role="status"></div>
+</div>
+
+<script src="assets/assets_data.js?v=14"></script>
+<script src="game.js?v=14"></script>
+<script>
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('./sw.js').catch(function () {});
+        });
+    }
+</script>
+</body>
+</html>

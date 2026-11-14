@@ -1,0 +1,27 @@
+{
+  "name": "لعبة الأرنوبة الشقية 🐰🥕",
+  "short_name": "الأرنوبة الشقية",
+  "description": "مغامرة الأرنوبة الشقية عبر 5 عوالم أسطورية لجمع الجزر وتخطي العوائق الذكية!",
+  "start_url": "https://rabit.megadeveloper.site/",
+  "scope": "https://rabit.megadeveloper.site/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#070b14",
+  "theme_color": "#ff7b00",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

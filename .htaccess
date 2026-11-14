@@ -1,0 +1,38 @@
+# .htaccess for https://rabit.megadeveloper.site/ (cPanel Optimized)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Force HTTPS on rabit.megadeveloper.site
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP_HOST} ^(www\.)?rabit\.megadeveloper\.site$ [NC]
+    RewriteRule ^(.*)$ https://rabit.megadeveloper.site/$1 [L,R=301]
+</IfModule>
+
+DirectoryIndex index.html
+
+# Correct MIME Types for Game Assets & PWA
+<IfModule mod_mime.c>
+    AddType application/manifest+json .json .webmanifest
+    AddType application/javascript .js
+    AddType text/css .css
+    AddType audio/mpeg .mp3
+    AddType image/webp .webp
+    AddType image/png .png
+    AddType image/jpeg .jpg .jpeg
+</IfModule>
+
+# Enable GZIP / Deflate Compression for Fast Mobile Loading
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+# Browser Caching
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 7 days"
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType audio/mpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType text/css "access plus 7 days"
+</IfModule>
